@@ -109,11 +109,25 @@ app.put('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, res
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
-  // Complete aqui
+  const { id } = request.params;
+  const { user, todoOperation } = request;
+
+  todoOperation.done = true;
+
+  user.todos.map((todo) => {
+    if(todo.id === id) {
+      todo = todoOperation;
+    }
+  });
+
+  return response.status(200).send();
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
-  // Complete aqui
+  const { user, todoOperation } = request;
+
+  user.todos.splice(todoOperation, 1);
+  return response.status(200).send(user.todos);
 });
 
 module.exports = app;
