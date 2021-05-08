@@ -28,6 +28,25 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 }
 
+function checksExistsTodoID(request, response, next) {
+  const { id } = request.params;
+  const { user } = request;
+  
+  const todoOperation = user.todos.find(
+    (todo) => todo.id === id
+  );
+
+  if(!todoOperation) {
+    return response.status(404).json({
+      error: 'Todo not found'
+    });
+  }
+
+  request.todoOperation = todoOperation;
+
+  return next();
+}
+
 app.post('/users', (request, response) => {
   const { name, username } = request.body;
 
@@ -72,15 +91,28 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   return response.status(201).send();
 });
 
-app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
+app.put('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
+  const { id } = request.params;
+  const { title, deadline } = request.body;
+  const { user, todoOperation } = request;
+
+  todoOperation.title = title;
+  todoOperation.deadline = new Date(deadline);
+
+  user.todos.map((todo) => {
+    if(todo.id === id) {
+      todo = todoOperation;
+    }
+  });
+
+  return response.status(200).send();
+});
+
+app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
   // Complete aqui
 });
 
-app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
-});
-
-app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
+app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
   // Complete aqui
 });
 
