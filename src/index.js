@@ -60,14 +60,15 @@ app.post('/users', (request, response) => {
     });
   }
 
-  users.push({
+  const userOperation = {
     id: uuidv4(),
     name,
     username,
     todos: []
-  });
+  }
 
-  response.status(201).send();
+  users.push(userOperation);
+  response.status(201).json(userOperation);
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
@@ -88,7 +89,13 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   }
 
   user.todos.push(todoOperation);
-  return response.status(201).send();
+  return response.status(201).json({
+    id: todoOperation.id,
+    title: todoOperation.title,
+    deadline: todoOperation.deadline.toISOString(),
+    done: todoOperation.done,
+    created_at: todoOperation.created_at
+  });
 });
 
 app.put('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
@@ -105,7 +112,13 @@ app.put('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, res
     }
   });
 
-  return response.status(200).send();
+  return response.status(200).json({
+    id: todoOperation.id,
+    title: todoOperation.title,
+    deadline: todoOperation.deadline.toISOString(),
+    done: todoOperation.done,
+    created_at: todoOperation.created_at
+  });
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
@@ -120,14 +133,20 @@ app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsTodoID, (reque
     }
   });
 
-  return response.status(200).send();
+  return response.status(200).send({
+    id: todoOperation.id,
+    title: todoOperation.title,
+    deadline: todoOperation.deadline.toISOString(),
+    done: todoOperation.done,
+    created_at: todoOperation.created_at
+  });
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodoID, (request, response) => {
   const { user, todoOperation } = request;
 
   user.todos.splice(todoOperation, 1);
-  return response.status(200).send(user.todos);
+  return response.status(204).send();
 });
 
 module.exports = app;
